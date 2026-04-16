@@ -1,0 +1,19 @@
+# Core ML
+torch>=2.4.0
+torchvision
+optimum[onnxruntime]
+onnxruntime
+onnx
+sentence-transformers>=3.0.0
+transformers>=4.40.0
+
+# App & Visualisation
+streamlit>=1.40.0
+pandas
+numpy
+plotly
+scikit-learn
+umap-learn
+
+# Utilities
+tqdm
