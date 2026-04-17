@@ -1,11 +1,10 @@
 # 🌍 Multilingual ONNX Embedding Explorer
 
-> **Real engineering. Real constraints. Real production.**
-> Enterprise ML pipelines often can't run heavy dependencies like PyTorch or
-> load GPU-based models inside data platform UDFs.
-> I solved this by converting a multilingual embedding model to ONNX —
-> a format that runs fast on pure CPU, anywhere.
-> This project recreates that same engineering across my two languages:
+> **From production innovation to personal portfolio.**
+> When there are no GPU access in your cloud data platform, how to use NLP use-cases then?
+> I converted a multilingual embedding model to ONNX and shipped it working with engineering
+> to production without any vendor support.
+> This project recreates that same engineering — now across my two languages:
 > **English** and **اردو (Urdu)**.
 
 ---
@@ -120,6 +119,7 @@ streamlit run app.py
 
 Built by **Bilal** — Senior Data Scientist & ML Engineer.
 
+Pakistani immigrant in America. I build things that work under constraints.
 Pakistani immigrant in America. I build things that work under constraints.
 
 Connect: [LinkedIn](https://linkedin.com/in/muhammadbilaljamil)
