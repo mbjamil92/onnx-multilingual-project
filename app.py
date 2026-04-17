@@ -158,10 +158,7 @@ with tab1:
 
         import pandas as pd
         df = pd.DataFrame(results)
-        st.dataframe(
-            df.style.background_gradient(subset=["Similarity"], cmap="Greens"),
-            use_container_width=True,
-        )
+        st.dataframe(df, use_container_width=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
