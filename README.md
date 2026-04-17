@@ -101,7 +101,6 @@ streamlit run app.py
 
 Built by **Bilal** — Data Scientist & ML Engineer.
 
-Pakistani immigrant in America. I build things that work under constraints —
-no GPU, no vendor support, just engineering.
+Pakistani immigrant in America. I build things that work under constraints.
 
 Connect: [LinkedIn](https://linkedin.com/in/muhammadbilaljamil)
