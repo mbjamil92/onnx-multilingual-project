@@ -1,7 +1,7 @@
 # 🌍 Multilingual ONNX Embedding Explorer
 
 > **From production innovation to personal portfolio.**
-> At work, we had no GPU access in our cloud data platform.
+> When there are no GPU access in your cloud data platform, how to use NLP use-cases then?
 > I converted a multilingual embedding model to ONNX and shipped it working with engineering
 > to production without any vendor support.
 > This project recreates that same engineering — now across my two languages:
