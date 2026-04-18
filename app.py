@@ -31,8 +31,13 @@ MODEL_ID  = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 def load_onnx_model():
     from optimum.onnxruntime import ORTModelForFeatureExtraction
     from transformers import AutoTokenizer
-    tokenizer = AutoTokenizer.from_pretrained(ONNX_DIR)
-    model = ORTModelForFeatureExtraction.from_pretrained(ONNX_DIR)
+    # Load from local cache if available, otherwise download & convert from HF Hub
+    if ONNX_DIR.exists():
+        tokenizer = AutoTokenizer.from_pretrained(ONNX_DIR)
+        model = ORTModelForFeatureExtraction.from_pretrained(ONNX_DIR)
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
+        model = ORTModelForFeatureExtraction.from_pretrained(MODEL_ID, export=True)
     return tokenizer, model
 
 @st.cache_resource
@@ -77,10 +82,6 @@ Built across two of my languages: **English** and **اردو (Urdu)**.
 """)
 st.divider()
 
-# Check ONNX model exists
-if not ONNX_DIR.exists():
-    st.error("⚠️ ONNX model not found. Run `python convert_to_onnx.py` first.")
-    st.stop()
 
 tab1, tab2, tab3 = st.tabs([
     "🔤 Semantic Similarity",
