@@ -328,18 +328,21 @@ with tab3:
                 results["PyTorch MPS (M1)"] = np.mean(times) * 1000
 
         # ONNX
-        with st.spinner("Benchmarking ONNX Runtime..."):
-            tok_onnx, mdl_onnx = load_onnx_model()
-            inp_onnx = tok_onnx(test_sents, padding=True, truncation=True,
-                                return_tensors="pt", max_length=128)
-            _ = mdl_onnx(**inp_onnx)  # warm up
-            times = []
-            for _ in range(n_runs):
-                t0 = time.perf_counter()
-                out = mdl_onnx(**inp_onnx)
-                mean_pool(out.last_hidden_state, inp_onnx["attention_mask"])
-                times.append(time.perf_counter() - t0)
-            results["ONNX Runtime"] = np.mean(times) * 1000
+        if ONNX_DIR.exists():
+            with st.spinner("Benchmarking ONNX Runtime..."):
+                mode, tok_onnx, mdl_onnx = load_embedding_model()
+                inp_onnx = tok_onnx(test_sents, padding=True, truncation=True,
+                                    return_tensors="pt", max_length=128)
+                _ = mdl_onnx(**inp_onnx)  # warm up
+                times = []
+                for _ in range(n_runs):
+                    t0 = time.perf_counter()
+                    out = mdl_onnx(**inp_onnx)
+                    mean_pool(out.last_hidden_state, inp_onnx["attention_mask"])
+                    times.append(time.perf_counter() - t0)
+                results["ONNX Runtime"] = np.mean(times) * 1000
+        else:
+            st.info("⚡ ONNX benchmark only available locally (run `python convert_to_onnx.py` first).")
 
         # ── Plot ──────────────────────────────────────────────────────────────
         import pandas as pd
