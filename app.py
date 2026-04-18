@@ -28,17 +28,24 @@ MODEL_ID  = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
 # ── Cached model loaders ──────────────────────────────────────────────────────
 @st.cache_resource
-def load_onnx_model():
-    from optimum.onnxruntime import ORTModelForFeatureExtraction
-    from transformers import AutoTokenizer
-    # Load from local cache if available, otherwise download & convert from HF Hub
+def load_embedding_model():
+    """
+    Smart loader:
+    - Local (your Mac): loads pre-converted ONNX from models/ folder — fast & lightweight
+    - Cloud (Streamlit): loads via sentence-transformers directly — no ONNX conversion needed
+    """
     if ONNX_DIR.exists():
+        # Local: use pre-built ONNX model (the ML engineering showcase)
+        from optimum.onnxruntime import ORTModelForFeatureExtraction
+        from transformers import AutoTokenizer
         tokenizer = AutoTokenizer.from_pretrained(ONNX_DIR)
         model = ORTModelForFeatureExtraction.from_pretrained(ONNX_DIR)
+        return ("onnx", tokenizer, model)
     else:
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
-        model = ORTModelForFeatureExtraction.from_pretrained(MODEL_ID, export=True)
-    return tokenizer, model
+        # Cloud: use sentence-transformers — downloads from HF Hub, no heavy conversion
+        from sentence_transformers import SentenceTransformer
+        model = SentenceTransformer(MODEL_ID)
+        return ("st", None, model)
 
 @st.cache_resource
 def load_pytorch_model(device="cpu"):
@@ -57,15 +64,19 @@ def mean_pool(token_emb, attn_mask):
     return F.normalize(emb, p=2, dim=1)
 
 
-def get_onnx_embeddings(sentences):
-    import torch, torch.nn.functional as F
-    tokenizer, model = load_onnx_model()
-    inputs = tokenizer(sentences, padding=True, truncation=True,
-                       return_tensors="pt", max_length=128)
-    with torch.no_grad():
-        out = model(**inputs)
-    emb = mean_pool(out.last_hidden_state, inputs["attention_mask"])
-    return emb.detach().numpy()
+def get_embeddings(sentences):
+    """Get embeddings using whichever backend is available."""
+    mode, tokenizer, model = load_embedding_model()
+    if mode == "onnx":
+        import torch, torch.nn.functional as F
+        inputs = tokenizer(sentences, padding=True, truncation=True,
+                           return_tensors="pt", max_length=128)
+        with torch.no_grad():
+            out = model(**inputs)
+        emb = mean_pool(out.last_hidden_state, inputs["attention_mask"])
+        return emb.detach().numpy()
+    else:
+        return model.encode(sentences, normalize_embeddings=True)
 
 
 def cosine_sim(a, b):
@@ -118,7 +129,7 @@ with tab1:
     if st.button("Compute Similarity", type="primary"):
         with st.spinner("Running ONNX inference..."):
             t0 = time.perf_counter()
-            embs = get_onnx_embeddings([sent_en, sent_ur])
+            embs = get_embeddings([sent_en, sent_ur])
             elapsed_ms = (time.perf_counter() - t0) * 1000
 
         sim = cosine_sim(embs[0], embs[1])
@@ -150,7 +161,7 @@ with tab1:
     if st.button("Run all pairs"):
         all_sents = [s for pair in preset_pairs for s in pair]
         with st.spinner("Computing embeddings for all pairs..."):
-            embs = get_onnx_embeddings(all_sents)
+            embs = get_embeddings(all_sents)
 
         results = []
         for i, (en, ur) in enumerate(preset_pairs):
@@ -223,7 +234,7 @@ with tab2:
                 groups.append(group)
 
         with st.spinner("Computing embeddings and running UMAP..."):
-            embs = get_onnx_embeddings(all_sents)
+            embs = get_embeddings(all_sents)
 
             try:
                 import umap
